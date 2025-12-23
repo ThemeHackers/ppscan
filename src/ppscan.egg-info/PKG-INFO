@@ -1,0 +1,11 @@
+Metadata-Version: 2.4
+Name: ppscan
+Version: 0.1.0
+Summary: A powerful Prototype Pollution Scanner
+Author-email: User <user@example.com>
+Requires-Python: >=3.10
+License-File: LICENSE
+Requires-Dist: playwright
+Requires-Dist: termcolor
+Requires-Dist: rich
+Dynamic: license-file

@@ -1,0 +1,2 @@
+[console_scripts]
+ppscan = ppscan.cli:main

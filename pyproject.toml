@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ppscan"
+version = "0.1.0"
+description = "A powerful Prototype Pollution Scanner"
+authors = [
+    {name = "ThemeHackers", email = "tigerzaza5678@gmail.com"},
+]
+dependencies = [
+    "playwright",
+    "termcolor",
+    "rich",
+]
+requires-python = ">=3.10"
+
+[project.scripts]
+ppscan = "ppscan.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
