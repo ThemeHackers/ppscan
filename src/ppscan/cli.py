@@ -21,6 +21,8 @@ def main():
     parser.add_argument("--callback", help="Callback URL for SSRF detection (default: attacker.tld)", type=str, default="attacker.tld")
     parser.add_argument("--json", help="Output file for JSON results", type=str)
     
+    parser.add_argument("--sspp", help="Enable Server-Side Prototype Pollution detection", action="store_true")
+    
     args = parser.parse_args()
     
     header_text = Text(r"""
@@ -62,11 +64,14 @@ def main():
     urls = [u for u in urls if u.startswith("http")]
 
     fuzzed_urls = []
-    with console.status("[bold green]Generating payloads..."):
-        for url in urls:
-            fuzzed_urls.extend(builder.build_queries(url))
-
-    console.print(f"[bold cyan]Scanning {len(fuzzed_urls)} fuzzed URLs generated from {len(urls)} targets...[/bold cyan]")
+    if args.sspp:
+        fuzzed_urls = urls
+        console.print(f"[bold cyan]Scanning {len(fuzzed_urls)} targets for Server-Side Prototype Pollution...[/bold cyan]")
+    else:
+        with console.status("[bold green]Generating payloads..."):
+            for url in urls:
+                fuzzed_urls.extend(builder.build_queries(url))
+        console.print(f"[bold cyan]Scanning {len(fuzzed_urls)} fuzzed URLs generated from {len(urls)} targets...[/bold cyan]")
 
     import json
 
@@ -88,7 +93,8 @@ def main():
         headers=custom_headers,
         user_agent=args.user_agent,
         verify_exploit=args.exploit,
-        callback_url=args.callback
+        callback_url=args.callback,
+        sspp=args.sspp
     )
     try:
         results = asyncio.run(scan_engine.scan(fuzzed_urls))
