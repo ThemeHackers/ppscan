@@ -17,6 +17,7 @@ It leverages **Playwright** to instrument a real browser context, ensuring accur
 - **🛡️ Comprehensive Payloads**: Includes an expanded list of payloads covering various injection vectors (`__proto__`, `constructor`, etc.).
 - **🔁 Auto-Retry**: Built-in network retry logic to handle flaky connections.
 - **🕵️ SSRF Detection**: Supports callback URLs to detect Server-Side Request Forgery via prototype pollution.
+- **🛡️ Server-Side Detection**: New `--sspp` mode to detect Server-Side Prototype Pollution via property reflection and status code overrides.
 
 ## 📦 Installation
 
@@ -69,6 +70,7 @@ ppscan.bat -u http://example.com
 | `--proxy` | Proxy URL (e.g., `http://127.0.0.1:8080`) | - |
 | `--headers` | Custom headers (JSON or `Key: Value`) | - |
 | `--callback` | Callback URL for SSRF detection | `attacker.tld` |
+| `--sspp` | Enable Server-Side Prototype Pollution detection | `False` |
 
 ## 💡 Examples
 
@@ -85,6 +87,11 @@ ppscan.bat -u http://example.com
 **Scan with proxy (e.g., Burp Suite)**
 ```bash
 ./ppscan -u http://example.com --proxy http://127.0.0.1:8080
+```
+
+**Scan for Server-Side Prototype Pollution (SSPP)**
+```bash
+./ppscan -u http://example.com --sspp
 ```
 
 ## ⚠️ Disclaimer
