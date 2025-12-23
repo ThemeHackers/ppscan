@@ -94,6 +94,48 @@ ppscan.bat -u http://example.com
 ./ppscan -u http://example.com --sspp
 ```
 
+## 🔍 Advanced Features
+
+### 🛡️ Server-Side Prototype Pollution (`--sspp`)
+
+This flag enables a specialized scanning mode designed for **Server-Side** detection. Unlike the default client-side scan, this mode targets JSON endpoints and attempts to pollute the server-side application state.
+
+**How it works:**
+1.  **Reflection-Based Detection**:
+    - Injects random key-value pairs using `__proto__` and `constructor.prototype` payloads.
+    - Recursively analyzes the JSON response to check if the injected property is reflected, indicating that the object prototype was successfully polluted and merged into the response.
+2.  **Error-Based Detection (Status Code Override)**:
+    - Designed for cases where reflection is disabled or sanitized.
+    - Attempts to pollute `Object.prototype.status` (or `statusCode`).
+    - Triggers a subsequent error (by sending malformed JSON) and checks if the server's error response returns the *polluted* status code (e.g., 555) instead of the default error code.
+
+**Usage:**
+```bash
+./ppscan -u http://target.com/api/user --sspp
+```
+
+---
+
+### 🕵️ SSRF Detection (`--callback`)
+
+This feature is used to detect if a Prototype Pollution vulnerability can be escalated to **Server-Side Request Forgery (SSRF)** or external script loading.
+
+**What is `attacker.tld`?**
+- `attacker.tld` is the **default placeholder** callback URL.
+- The scanner looks for known gadgets (in libraries like generic, santizer, etc.) where a polluted property (e.g., `src`, `url`, `href`) causes the application to fetch a remote resource.
+
+**How it works:**
+- If a gadget is detected, the scanner generates a specific payload pointing to your callback URL.
+- If the application is vulnerable, it will make a request (DNS or HTTP) to your listener.
+
+**Recommendation:**
+Change the default `attacker.tld` to your own **OAST (Out-of-Band Application Security Testing)** identifier, such as a **Burp Collaborator** link, **interact.sh** URL, or your own listener.
+
+**Usage:**
+```bash
+./ppscan -u http://target.com --callback http://your-collaborator-id.oastify.com
+```
+
 ## ⚠️ Disclaimer
 
 This tool is for **educational purposes and authorized security testing only**. You must have explicit permission to scan any targets. The authors are not responsible for any misuse or damage caused by this tool.
