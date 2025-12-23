@@ -1,0 +1,13 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+
+if [ -f "$DIR/.venv/bin/activate" ]; then
+    source "$DIR/.venv/bin/activate"
+fi
+
+
+export PYTHONPATH="$DIR/src:$PYTHONPATH"
+
+
+exec python3 -m ppscan.cli "$@"

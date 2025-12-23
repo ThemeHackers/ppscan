@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPSCAN Cyber Range</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --bg-card: #0f172a;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-low: #22c55e;
+            --accent-med: #eab308;
+            --accent-high: #f97316;
+            --accent-crit: #ef4444;
+            --border-color: rgba(255, 255, 255, 0.05);
+            --glow-low: rgba(34, 197, 94, 0.15);
+            --glow-med: rgba(234, 179, 8, 0.15);
+            --glow-high: rgba(249, 115, 22, 0.15);
+            --glow-crit: rgba(239, 68, 68, 0.15);
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 4rem 0 2rem;
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 4rem;
+            margin: 0;
+            letter-spacing: -2px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .category-header {
+            grid-column: 1 / -1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .category-header h2 {
+            font-size: 1.5rem;
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+
+        .category-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            /* Increased padding */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+            /* CENTER ALIGNMENT ADDED */
+            align-items: center;
+            /* CENTER ITEMS */
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .card-low:hover {
+            box-shadow: 0 10px 40px -10px var(--glow-low);
+        }
+
+        .card-med:hover {
+            box-shadow: 0 10px 40px -10px var(--glow-med);
+        }
+
+        .card-high:hover {
+            box-shadow: 0 10px 40px -10px var(--glow-high);
+        }
+
+        .card-crit:hover {
+            box-shadow: 0 10px 40px -10px var(--glow-crit);
+        }
+
+        .card-low::before {
+            background: var(--accent-low);
+        }
+
+        .card-med::before {
+            background: var(--accent-med);
+        }
+
+        .card-high::before {
+            background: var(--accent-high);
+        }
+
+        .card-crit::before {
+            background: var(--accent-crit);
+        }
+
+        .lab-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .card h3 {
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .mission {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px dashed var(--border-color);
+        }
+
+        .mission strong {
+            color: #fff;
+            display: block;
+            margin-bottom: 0.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #cbd5e1;
+            transform: scale(1.02);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Category Specific Colors */
+        .cat-low {
+            color: var(--accent-low);
+        }
+
+        .cat-med {
+            color: var(--accent-med);
+        }
+
+        .cat-high {
+            color: var(--accent-high);
+        }
+
+        .cat-crit {
+            color: var(--accent-crit);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>PPSCAN<span style="color:var(--accent-low)">.</span>RANGE</h1>
+            <p>Prototype Pollution Defense & Exploitation Labs</p>
+        </header>
+
+        <div class="grid-container">
+            <!-- LOW SECURITY -->
+            <div class="category-header">
+                <div class="category-indicator" style="background: var(--accent-low)"></div>
+                <h2 class="cat-low">Basic Exploitation</h2>
+            </div>
+
+            <div class="card card-low">
+                <div>
+                    <span class="lab-badge">LAB 01</span>
+                    <h3>The Beginning</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        Inject a property directly into `Object.prototype`. Standard `__proto__` is exposed.
+                    </div>
+                </div>
+                <a href="level.html?lab=1" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="card card-low">
+                <div>
+                    <span class="lab-badge">LAB 02</span>
+                    <h3>Constructor Chains</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        `__proto__` is filtered? Try traversing via `constructor.prototype`.
+                    </div>
+                </div>
+                <a href="level.html?lab=2" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="card card-low">
+                <div>
+                    <span class="lab-badge">LAB 03</span>
+                    <h3>Path Traversal</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        The parser uses dot notation (`a.b`). Use `__proto__.property`.
+                    </div>
+                </div>
+                <a href="level.html?lab=3" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- MEDIUM SECURITY -->
+            <div class="category-header">
+                <div class="category-indicator" style="background: var(--accent-med)"></div>
+                <h2 class="cat-med">Bypassing Filters</h2>
+            </div>
+
+            <div class="card card-med">
+                <div>
+                    <span class="lab-badge">LAB 04</span>
+                    <h3>Keyword Block</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        The word `__proto__` is strictly forbidden. Find another way to the prototype.
+                    </div>
+                </div>
+                <a href="level.html?lab=4" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="card card-med">
+                <div>
+                    <span class="lab-badge">LAB 05</span>
+                    <h3>Weak Sanitization</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        The input removes `__proto__`, but only once.
+                    </div>
+                </div>
+                <a href="level.html?lab=5" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="card card-med">
+                <div>
+                    <span class="lab-badge">LAB 06</span>
+                    <h3>Incomplete Defense</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        `prototype` is blocked, but `constructor` is left open.
+                    </div>
+                </div>
+                <a href="level.html?lab=6" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- HIGH SECURITY -->
+            <div class="category-header">
+                <div class="category-indicator" style="background: var(--accent-high)"></div>
+                <h2 class="cat-high">Advanced Techniques</h2>
+            </div>
+
+            <div class="card card-high">
+                <div>
+                    <span class="lab-badge">LAB 07</span>
+                    <h3>Sanitization</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        Complex filtering. Can you find a gadget bypass?
+                    </div>
+                </div>
+                <a href="level.html?lab=7" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="card card-high">
+                <div>
+                    <span class="lab-badge">LAB 08</span>
+                    <h3>Frozen Core</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        `Object.prototype` is frozen. Target a sub-object.
+                    </div>
+                </div>
+                <a href="level.html?lab=8" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="card card-high">
+                <div>
+                    <span class="lab-badge">LAB 09</span>
+                    <h3>Logic Gate</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        Requires specific JSON structure to trigger the vulnerable merge.
+                    </div>
+                </div>
+                <a href="level.html?lab=9" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- CRITICAL SECURITY -->
+            <div class="category-header">
+                <div class="category-indicator" style="background: var(--accent-crit)"></div>
+                <h2 class="cat-crit">Gadget Chains (RCE/XSS)</h2>
+            </div>
+
+            <div class="card card-crit">
+                <div>
+                    <span class="lab-badge">LAB 10</span>
+                    <h3>jQuery Gadget</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        Exploit a known gadget in jQuery to achieve XSS.
+                    </div>
+                </div>
+                <a href="level.html?lab=10" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="card card-crit">
+                <div>
+                    <span class="lab-badge">LAB 11</span>
+                    <h3>Lodash RCE</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        Simulate Template Injection using Lodash gadgets.
+                    </div>
+                </div>
+                <a href="level.html?lab=11" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            <div class="card card-crit">
+                <div>
+                    <span class="lab-badge">LAB 12</span>
+                    <h3>Analytics Injection</h3>
+                    <div class="mission">
+                        <strong>Mission Brief</strong>
+                        Pollute configuration to inject values into Google Analytics.
+                    </div>
+                </div>
+                <a href="level.html?lab=12" class="btn">
+                    Launch Lab
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>

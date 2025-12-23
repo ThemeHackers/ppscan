@@ -1,0 +1,6 @@
+playwright
+termcolor
+rich
+
+pytest
+pytest-asyncio

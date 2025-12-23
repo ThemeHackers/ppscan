@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPSCAN Lab Environment</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --panel-bg: rgba(15, 23, 42, 0.6);
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #22c55e;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .hud-panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            width: 100%;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hud-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        .header h2 {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            color: var(--accent);
+            margin: 0 0 0.5rem 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            margin: 0 0 2rem 0;
+            line-height: 1;
+            background: linear-gradient(to bottom right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        .status-wrapper {
+            position: relative;
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            animation: spin 10s linear infinite;
+        }
+
+        .status-ring::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 50%;
+            width: 20px;
+            height: 4px;
+            background: var(--bg-dark);
+            transform: translateX(-50%);
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            z-index: 2;
+            transition: all 0.3s ease;
+        }
+
+        .status-wrapper.vuln .status-ring {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px var(--accent);
+        }
+
+        .status-text {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .mission-box {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            border: 1px dashed var(--border);
+        }
+
+        .mission-label {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .mission-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-primary);
+            font-family: var(--font-mono);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+        }
+
+        .btn-solve {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .btn-solve:hover {
+            background: #4ade80;
+            border-color: #4ade80;
+            transform: scale(1.05);
+        }
+
+        .console-log {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2rem;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="hud-panel">
+            <div class="header">
+                <h2>Cyber Range</h2>
+                <h1 id="lab-id">LAB 01</h1>
+            </div>
+
+            <div class="status-wrapper" id="status-wrap">
+                <div class="status-ring"></div>
+                <div class="status-icon" id="status-icon">🔒</div>
+            </div>
+
+            <div class="status-text" id="status-text">System Secure</div>
+
+            <div class="mission-box">
+                <span class="mission-label">Target Objective</span>
+                <div id="mission-text" class="mission-text">Loading...</div>
+            </div>
+
+            <div class="actions">
+                <a href="index.html" class="btn">Back to Range</a>
+                <button id="solve-btn" class="btn btn-solve">Show Solution</button>
+            </div>
+
+            <div class="console-log" id="console">
+                > Initializing environment...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const labId = parseInt(params.get('lab')) || 1;
+        document.getElementById('lab-id').innerText = `LAB ${labId.toString().padStart(2, '0')}`;
+
+        // DB
+        const db = {
+            missions: {
+                1: "Inject a property into Object.prototype using standard __proto__ payload.",
+                2: "Bypass simple checks by using constructor.prototype.",
+                3: "The parser splits by dot (.). Use __proto__.property syntax.",
+                4: "The keyword __proto__ is blocked. Find an alternative path.",
+                5: "The filter isn't recursive. Try nested or alternative encoding.",
+                6: "Developer blocked prototype but forgot constructor.",
+                7: "Deep check for dangerous keys involved. Requires obscure bypass or gadget.",
+                8: "Object.prototype might be frozen. Can you pollute a sub-object?",
+                9: "Logic requires a specific parameter structure to trigger the merge.",
+                10: "Pollute Object.prototype to trigger XSS in jQuery gadget.",
+                11: "Exploit old Lodash version using template injection payload.",
+                12: "Inject a cookie value via Google Analytics gadget."
+            },
+            solutions: {
+                1: "?__proto__[ppfuzz]=reserved",
+                2: "?constructor[prototype][ppfuzz]=reserved",
+                3: "?__proto__.ppfuzz=reserved",
+                4: "?constructor[prototype][ppfuzz]=reserved",
+                5: "?__proto__[ppfuzz]=reserved",
+                6: "?constructor[prototype][ppfuzz]=reserved",
+                7: "Requires gadget chain or specific encoding.",
+                8: "?__proto__[sub][ppfuzz]=reserved",
+                9: "?config[__proto__][ppfuzz]=reserved",
+                10: "?__proto__[context]=<img/src/onerror=alert(1)>&__proto__[jquery]=x",
+                11: "?__proto__[sourceURL]=\u2028\u2029alert(1)",
+                12: "?__proto__[cookieName]=COOKIE=Injection;"
+            }
+        };
+
+        const missionEl = document.getElementById('mission-text');
+        if (missionEl) missionEl.innerText = db.missions[labId] || "Unknown Mission";
+
+        // Logic
+        const log = (msg) => {
+            const c = document.getElementById('console');
+            if (c) c.innerText = `> ${msg}`;
+        };
+
+        const solveBtn = document.getElementById('solve-btn');
+        if (solveBtn) {
+            solveBtn.onclick = () => {
+                alert(`SOLUTION:\n${db.solutions[labId]}`);
+            };
+        }
+
+        // Vulnerability Simulation Logic
+        const check = () => {
+            if (window.ppfuzz === 'reserved' || Object.prototype.ppfuzz === 'reserved') {
+                const wrap = document.getElementById('status-wrap');
+                const icon = document.getElementById('status-icon');
+                const text = document.getElementById('status-text');
+
+                if (wrap) wrap.className = "status-wrapper vuln";
+                if (icon) icon.innerHTML = "🔓";
+                if (text) {
+                    text.innerText = "SYSTEM COMPROMISED";
+                    text.style.color = "#4ade80";
+                    text.style.fontWeight = "bold";
+                }
+
+                log("CRITICAL: Prototype Pollution Detected successfully.");
+                return true;
+            }
+            return false;
+        };
+
+        const merge = (target, path, value) => {
+            // Filters based on Lab ID
+            if (labId === 4 && path.includes('__proto__')) return;
+            if (labId === 6 && path.includes('prototype')) return;
+            if (labId === 7) {
+                if (path.some(p => p.includes('proto') || p.includes('constructor'))) return;
+            }
+
+            let current = target;
+            for (let i = 0; i < path.length - 1; i++) {
+                let part = path[i];
+
+                if (part === '__proto__') { current = Object.prototype; continue; }
+                if (part === 'constructor') { current = current.constructor; continue; }
+                if (part === 'prototype') { current = current.prototype; continue; }
+
+                if (!current[part]) current[part] = {};
+                current = current[part];
+            }
+
+            let last = path[path.length - 1];
+            if (last === '__proto__') {
+                Object.prototype[value] = 'reserved';
+            } else {
+                try { current[last] = value; } catch (e) { }
+            }
+        };
+
+        const root = {};
+        const rawSearch = window.location.search.substring(1);
+
+        if (rawSearch) {
+            log("Processing input parameters...");
+            rawSearch.split('&').forEach(pair => {
+                if (!pair) return;
+                let [key, val] = pair.split('=').map(decodeURIComponent);
+                if (!val) val = "";
+
+                let parts = [];
+                if (labId === 3) {
+                    parts = key.split('.');
+                } else {
+                    parts = key.split(/\[|\]/).filter(Boolean);
+                }
+                merge(root, parts, val);
+            });
+        }
+
+        check();
+
+        // Gadget Simulations
+        if (labId >= 10) {
+            if (labId === 10) { // jQuery
+                window.$ = { fn: { jquery: '3.0.0' } };
+                if (Object.prototype.context && Object.prototype.context.includes('alert(1)')) {
+                    alert('XSS via jQuery');
+                }
+            }
+            if (labId === 11) { // Lodash
+                window._ = { VERSION: '4.17.10', template: () => { } };
+                if (Object.prototype.sourceURL && Object.prototype.sourceURL.includes('alert(1)')) {
+                    alert('XSS via Lodash');
+                }
+            }
+        }
+
+    </script>
+</body>
+
+</html>
